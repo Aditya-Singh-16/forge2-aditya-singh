@@ -25,45 +25,56 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
-            - name: Debug checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Debug checkout
         run: |
-          echo "Current directory:"
+          echo "===== CURRENT DIRECTORY ====="
           pwd
 
-          echo "Repository root:"
+          echo "===== REPOSITORY ROOT ====="
           ls -la
 
-          echo "Backend directory:"
+          echo "===== BACKEND DIRECTORY ====="
           ls -la backend || true
 
-          echo "Composer files:"
+          echo "===== COMPOSER FILES ====="
           find . -name composer.json
 
-          echo "Git commit:"
+          echo "===== GIT COMMIT ====="
           git rev-parse HEAD
-      - uses: shivammathur/setup-php@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, pdo_mysql, pdo_sqlite, sqlite3
           coverage: none
 
-      - name: Install
+      - name: Validate backend exists
+        run: |
+          test -f backend/composer.json
+
+      - name: Install dependencies
         working-directory: backend
         run: composer install --no-interaction --prefer-dist
 
-      - name: Configure
+      - name: Configure Laravel
         working-directory: backend
         run: |
           cp .env.example .env
           php artisan key:generate
           sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env
           sed -i 's/^DB_DATABASE=.*/DB_DATABASE=pulsedesk_test/' .env
           sed -i 's/^DB_USERNAME=.*/DB_USERNAME=root/' .env
           sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=root/' .env
 
-      - name: Migrate & Test
+      - name: Run migrations
         working-directory: backend
-        run: |
-          php artisan migrate --force
-          php artisan test
+        run: php artisan migrate --force
+
+      - name: Run tests
+        working-directory: backend
+        run: php artisan test
