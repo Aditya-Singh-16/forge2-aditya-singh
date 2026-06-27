@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\TicketController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,5 +25,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 
-    // TODO (next Sprint 1 requirement): tenant-scoped ticket + comment CRUD.
+    // Ticket CRUD routes
+    Route::apiResource('tickets', TicketController::class);
+
+    // Comment CRUD routes (nested under tickets)
+    Route::prefix('tickets/{ticket}')->group(function () {
+        Route::apiResource('comments', CommentController::class)->except(['store']);
+        Route::post('comments', [CommentController::class, 'store'])->name('tickets.comments.store');
+    });
 });
