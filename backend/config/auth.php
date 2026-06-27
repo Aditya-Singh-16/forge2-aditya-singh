@@ -42,6 +42,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Token-based API auth via Laravel Sanctum. Routes under routes/api.php
+        // authenticate with `auth:sanctum`; the tenant is then derived from the
+        // authenticated user's organization_id (see App\Services\TenantContext).
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
     ],
 
     /*
