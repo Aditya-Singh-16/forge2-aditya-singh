@@ -26,7 +26,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+            - name: Debug checkout
+        run: |
+          echo "Current directory:"
+          pwd
 
+          echo "Repository root:"
+          ls -la
+
+          echo "Backend directory:"
+          ls -la backend || true
+
+          echo "Composer files:"
+          find . -name composer.json
+
+          echo "Git commit:"
+          git rev-parse HEAD
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
